@@ -19,6 +19,14 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
+  //confix CORS (Cross-Origin Resource Sharing)
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    // optionsSuccessStatus: 204,
+  });
+
   await app.listen(configService.get<string>('PORT'));
 }
 bootstrap();
