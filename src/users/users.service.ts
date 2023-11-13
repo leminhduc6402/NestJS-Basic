@@ -88,7 +88,7 @@ export class UsersService {
     let defaultLimit = +limit ? +limit : 10;
     const totalItems = (await this.userModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
-    
+
     const result = await this.userModel
       .find(filter)
       .select('-password')
@@ -161,4 +161,8 @@ export class UsersService {
       _id: id,
     });
   }
+
+  updateUserToken = async (refreshToken: string, _id: string) => {
+    return await this.userModel.updateOne({ _id }, { refreshToken });
+  };
 }
