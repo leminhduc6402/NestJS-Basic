@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Post,
@@ -7,8 +8,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Public } from 'src/customDecorator/customize';
+import { Public, ResponseMessage } from 'src/customDecorator/customize';
 import { LocalAuthGuard } from './local-auth.guard';
+import { CreateUserDto, RegisterUserDto } from 'src/users/dto/create-user.dto';
 
 @Controller("auth")
 export class AuthController {
@@ -23,9 +25,10 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
-  // @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req: any) {
-    return req.user;
+  @Public()
+  @ResponseMessage("Resgister a new user")
+  @Post('/register')
+  async register(@Body() registerUserDto: RegisterUserDto){
+    return this.authService.register(registerUserDto);    
   }
 }
