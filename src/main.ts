@@ -27,9 +27,10 @@ async function bootstrap() {
 
   //config CORS (Cross-Origin Resource Sharing)
   app.enableCors({
-    origin: '*',
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
+    credentials: true,
     // optionsSuccessStatus: 204,
   });
 
