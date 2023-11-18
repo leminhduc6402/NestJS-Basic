@@ -31,7 +31,6 @@ export class AuthService {
   }
 
   async login(user: IUser, response: Response) {
-    // const payload = { username: user.email, sub: user._id };
     const { _id, email, name, role } = user;
     const payload = {
       sub: 'token login',
@@ -50,11 +49,13 @@ export class AuthService {
     response.cookie('refresh_token', refresh_token, {
       httpOnly: true,
       maxAge: ms(this.configService.get<string>('JWT_REFRESH_EXPIRE')),
+      sameSite: "none",
+      secure: true
     });
 
     return {
       access_token: this.jwtService.sign(payload),
-      // refresh_token,
+      refresh_token,
       user: {
         _id,
         name,
@@ -66,8 +67,12 @@ export class AuthService {
 
   async register(registerUserDto: RegisterUserDto) {
     const newUser = await this.usersService.register(registerUserDto);
+    // Gửi mail
     return { _id: newUser?._id, createdAt: newUser?.createdAt };
   }
+  // gửi code 
+  
+  // update user
 
   createRefreshToken = (payload: any) => {
     const refresh_token = this.jwtService.sign(payload, {
@@ -106,6 +111,8 @@ export class AuthService {
         response.cookie('refresh_token', refresh_token, {
           httpOnly: true,
           maxAge: ms(this.configService.get<string>('JWT_REFRESH_EXPIRE')),
+          sameSite: "none",
+          secure: true
         });
 
         return {
@@ -129,6 +136,6 @@ export class AuthService {
   logout = async (response: Response, user: IUser) => {
     await this.usersService.updateUserToken('', user._id);
     response.clearCookie('refresh_token');
-    return "Logout success"
+    return 'Logout success';
   };
 }
