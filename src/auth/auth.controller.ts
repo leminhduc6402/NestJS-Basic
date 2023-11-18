@@ -14,6 +14,7 @@ import { LocalAuthGuard } from './local-auth.guard';
 import { CreateUserDto, RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { Request, Response } from 'express';
 import { IUser } from 'src/users/users.interface';
+import { get } from 'http';
 
 @Controller('auth')
 export class AuthController {
@@ -46,14 +47,21 @@ export class AuthController {
   @Public()
   @ResponseMessage('Get user by refresh token')
   @Get('/refresh')
-  handleRefreshAccount(@Req() req: Request, @Res({ passthrough: true }) response: Response) {
+  handleRefreshAccount(
+    @Req() req: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const refreshToken = req.cookies['refresh_token'];
     return this.authService.processNewToken(refreshToken, response);
   }
 
   @ResponseMessage('Logout user')
   @Post('/logout')
-  handleLogout(@Res({ passthrough: true }) response: Response, @User() user: IUser){
+  handleLogout(
+    @Res({ passthrough: true }) response: Response,
+    @User() user: IUser,
+  ) {
     return this.authService.logout(response, user);
   }
+
 }

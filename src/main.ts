@@ -22,9 +22,6 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  //config cookies
-  app.use(cookieParser());
-
   //config CORS (Cross-Origin Resource Sharing)
   app.enableCors({
     origin: true,
@@ -33,6 +30,9 @@ async function bootstrap() {
     credentials: true,
     // optionsSuccessStatus: 204,
   });
+
+  //config cookies
+  app.use(cookieParser());
 
   // config versioning -- apis version
   app.setGlobalPrefix('api');
