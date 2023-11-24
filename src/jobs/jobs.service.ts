@@ -20,12 +20,14 @@ export class JobsService {
       name,
       skills,
       company,
+      salary,
       quantity,
       level,
       description,
       startDate,
       endDate,
       isActive,
+      location,
     } = createJobDto;
     let newJob = await this.jobModel.create({
       name,
@@ -33,10 +35,12 @@ export class JobsService {
       company,
       quantity,
       level,
+      salary,
       description,
       startDate,
       endDate,
       isActive,
+      location,
       createdBy: {
         _id: user._id,
         email: user.email,

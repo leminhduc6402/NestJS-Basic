@@ -15,7 +15,7 @@ import { FilesService } from './files.service';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Public } from 'src/customDecorator/customize';
+import { Public, ResponseMessage } from 'src/customDecorator/customize';
 
 @Controller('files')
 export class FilesController {
@@ -23,11 +23,13 @@ export class FilesController {
 
   @Public()
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @ResponseMessage('Upload single file')
+  @UseInterceptors(FileInterceptor('fileUpload'))
   uploadFile(
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addFileTypeValidator({
+          // fileType: /^(jpg|jpeg|image|\/png|gif|txt|pdf|application\/pdf|doc|docx|text|\/plain)$/i,
           fileType: 'jpeg',
         })
         .addMaxSizeValidator({
@@ -39,7 +41,9 @@ export class FilesController {
     )
     file: Express.Multer.File,
   ) {
-    console.log(file);
+    return {
+      fileName: file.filename,
+    };
   }
 
   @Get()
