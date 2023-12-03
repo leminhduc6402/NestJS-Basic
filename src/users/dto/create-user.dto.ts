@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsEmail,
+  IsMongoId,
   IsNotEmpty,
   IsNotEmptyObject,
   IsObject,
@@ -37,6 +38,7 @@ export class CreateUserDto {
   address: string;
 
   @IsNotEmpty({ message: 'Role không được để trống' })
+  @IsMongoId({ message: 'Role có định dạng mongoId' })
   role: string;
 
   @IsNotEmptyObject()
@@ -66,5 +68,5 @@ export class RegisterUserDto {
   @IsNotEmpty({ message: 'Address không được để trống' })
   address: string;
 
-  role: string
+  role: string;
 }

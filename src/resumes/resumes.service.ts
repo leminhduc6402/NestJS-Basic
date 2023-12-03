@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateResumeDto } from './dto/create-resume.dto';
+import { CreateResumeDto, CreateUserCvDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Resume, ResumeDocument } from './schemas/resume.schema';
@@ -15,8 +15,8 @@ export class ResumesService {
     private resumeModel: SoftDeleteModel<ResumeDocument>,
   ) {}
 
-  async create(createResumeDto: CreateResumeDto, user: IUser) {
-    const { url, companyId, jobId } = createResumeDto;
+  async create(createUserCvDto: CreateUserCvDto, user: IUser) {
+    const { url, companyId, jobId } = createUserCvDto;
     const { email, _id } = user;
     const newCv = await this.resumeModel.create({
       url,
@@ -47,13 +47,25 @@ export class ResumesService {
   }
 
   async findByUser(user: IUser) {
-    return await this.resumeModel.find({
-      userId: user._id,
-    });
+    return await this.resumeModel
+      .find({
+        userId: user._id,
+      })
+      .sort('-createdAt')
+      .populate([
+        {
+          path: 'companyId',
+          select: { name: 1 },
+        },
+        {
+          path: 'jobId',
+          select: { name: 1 },
+        },
+      ]);
   }
 
   async findAll(currentPage: number, limit: number, qs: string) {
-    const { filter, sort, population } = aqp(qs);
+    const { filter, sort, population, projection } = aqp(qs);
 
     delete filter.current;
     delete filter.pageSize;
@@ -68,6 +80,7 @@ export class ResumesService {
       .limit(defaultLimit)
       .sort(sort as any)
       .populate(population)
+      .select(projection as any)
       .exec();
 
     return {

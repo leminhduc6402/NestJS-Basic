@@ -1,6 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { ResumesService } from './resumes.service';
-import { CreateResumeDto } from './dto/create-resume.dto';
+import { CreateResumeDto, CreateUserCvDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { ResponseMessage, User } from 'src/customDecorator/customize';
 import { IUser } from 'src/users/users.interface';
@@ -11,8 +20,8 @@ export class ResumesController {
 
   @Post()
   @ResponseMessage('Create a new resume')
-  create(@Body() createResumeDto: CreateResumeDto, @User() user: IUser) {
-    return this.resumesService.create(createResumeDto, user);
+  create(@Body() createUserCvDto: CreateUserCvDto, @User() user: IUser) {
+    return this.resumesService.create(createUserCvDto, user);
   }
 
   @Get()
@@ -20,12 +29,12 @@ export class ResumesController {
   findAll(
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,
-    @Query() qs: string
+    @Query() qs: string,
   ) {
     return this.resumesService.findAll(+currentPage, +limit, qs);
   }
 
-  @Get(':id')
+  @Post('by-user')
   @ResponseMessage('Get resumes by user ')
   getResumesByUser(@User() user: IUser) {
     return this.resumesService.findByUser(user);
@@ -39,7 +48,11 @@ export class ResumesController {
 
   @Patch(':id')
   @ResponseMessage('Update status resume')
-  updateStatus(@Param('id') id: string, @Body('status') status: string, @User() user:  IUser) {
+  updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: string,
+    @User() user: IUser,
+  ) {
     return this.resumesService.update(id, status, user);
   }
 
