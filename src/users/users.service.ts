@@ -3,18 +3,23 @@ import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User as UserModel, UserDocument } from './schemas/user.schema';
-import mongoose, { Model } from 'mongoose';
+import mongoose from 'mongoose';
 import { genSaltSync, hashSync, compareSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
 import { IUser } from './users.interface';
 import { User } from 'src/customDecorator/customize';
+import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
+import { USER_ROLE } from 'src/databases/sample';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(UserModel.name)
     private userModel: SoftDeleteModel<UserDocument>,
+
+    @InjectModel(Role.name)
+    private roleModel: SoftDeleteModel<RoleDocument>,
   ) {}
 
   hashPassword = (password: string) => {
@@ -64,6 +69,8 @@ export class UsersService {
       );
     }
 
+    const userRole = await this.roleModel.findOne({ name: USER_ROLE });
+
     const hashPassword = this.hashPassword(password);
 
     let newRegister = await this.userModel.create({
@@ -73,7 +80,7 @@ export class UsersService {
       age,
       gender,
       address,
-      role: 'USER',
+      role: userRole._id,
     });
     return newRegister;
   }
@@ -127,7 +134,7 @@ export class UsersService {
       .findOne({
         email: username,
       })
-      .populate({ path: 'role', select: { name: 1, permissions: 1 } });
+      .populate({ path: 'role', select: { name: 1 } });
   }
 
   isValidPassword(password: string, hash: string) {
@@ -152,7 +159,7 @@ export class UsersService {
       return 'not found user';
     }
     const foundUser = await this.userModel.findById(id);
-    if (foundUser.email === 'leminhduc6402@gmail.com')
+    if (foundUser && foundUser.email === 'leminhduc6402@gmail.com')
       throw new BadRequestException('Không thể xoá tài khoản này');
 
     await this.userModel.updateOne(
@@ -174,6 +181,8 @@ export class UsersService {
   };
 
   findUserByToken = async (refreshToken: string) => {
-    return await this.userModel.findOne({ refreshToken });
+    return await this.userModel
+      .findOne({ refreshToken })
+      .populate({ path: 'role', select: { name: 1 } });
   };
 }
