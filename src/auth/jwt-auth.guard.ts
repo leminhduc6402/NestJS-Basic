@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { IS_PUBLIC_KEY } from 'src/customDecorator/customize';
+import { IS_PUBLIC_KEY, IS_PUBLIC_PERMISSION } from 'src/customDecorator/customize';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -28,6 +28,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   handleRequest(err, user, info, context: ExecutionContext) {
     const request: Request = context.switchToHttp().getRequest();
+    const isSkipPermission = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_PERMISSION, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
     // You can throw an exception based on either "info" or "err" arguments
     if (err || !user) {
       throw (
@@ -42,23 +46,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     const permissions = user?.permissions ?? [];
 
-    // const permissions = [
-    //   {
-    //     _id: '648ad640dafdb9754f40b8ab',
-    //     name: 'Update Role',
-    //     apiPath: '/api/v1/roles/:id',
-    //     method: 'PATCH',
-    //     module: 'ROLES',
-    //   },
-    //   {
-    //     _id: '648ad650dafdb9754f40b8b0',
-    //     name: 'Delete a Role',
-    //     apiPath: '/api/v1/roles/:id',
-    //     method: 'DELETE',
-    //     module: 'ROLES',
-    //   },
-    // ];
-
     let isExist = permissions.find((permission) => {
       return (
         targetMethod === permission.method &&
@@ -69,7 +56,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       isExist = true;
     }
 
-    if (!isExist) {
+    if (!isExist && !isSkipPermission) {
       throw new ForbiddenException(
         'Bạn không có quyền truy cập vào đường dẫn này',
       );
